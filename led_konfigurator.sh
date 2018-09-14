@@ -46,7 +46,13 @@ ledManipulationMenu() {
 		read -p 'Please enter a number (1-6) for your choice: ' selection
 	
 		case "$selection" in
-			1|2|3|4|5)
+			1)
+				ledTurnOn $led
+				;;
+			2)
+				ledTurnOff $led
+				;;
+			3|4|5)
 				echo 'Unimplemented'
 				;;
 			6)
@@ -54,6 +60,14 @@ ledManipulationMenu() {
 				;;
 		esac
 	done
+}
+
+ledTurnOff() {
+	echo 0 > $LEDPATH/$1/brightness
+}
+
+ledTurnOn() {
+	echo 1 > $LEDPATH/$1/brightness
 }
 
 main
