@@ -52,7 +52,10 @@ ledManipulationMenu() {
 			2)
 				ledTurnOff $led
 				;;
-			3|4|5)
+			3)
+				systemEventMenu $led
+				;;
+			4|5)
 				echo 'Unimplemented'
 				;;
 			6)
@@ -68,6 +71,52 @@ ledTurnOff() {
 
 ledTurnOn() {
 	echo 1 > $LEDPATH/$1/brightness
+}
+
+systemEventMenu() {
+	local systemEventSelection
+	while true; do
+		local pageMenu=()
+		pageMenu="${pageMenu}"'Associate Led with a system Event\n'
+		pageMenu="${pageMenu}"'=================================\n'
+		pageMenu="${pageMenu}"'Available events are:\n'
+		pageMenu="${pageMenu}"'---------------------\n'
+		local systemEvents=()
+		read -r -a systemEvents <<< $(getTriggers $1)
+		local counter=0
+		for event in "${systemEvents[@]}"; do
+			(( counter = counter + 1 ))
+			pageMenu="${pageMenu} ${counter}) "
+			if [[ $event =~ ^\[.+\]$ ]]; then
+				event=$(echo ${event} | sed -r -e 's/\[(.*)\]/\1/')
+				pageMenu="${pageMenu}${event}*"'\n'
+				systemEvents[$((counter - 1))]=${event}
+			else
+				pageMenu="${pageMenu}${event}"'\n'
+			fi
+		done
+		echo -e "${pageMenu}" | more
+		quitNo=$((counter+1))
+		local systemEventSelection
+		read -p "Please select an option: (1-${quitNo}): " systemEventSelection
+		
+		if [[ $systemEventSelection = $quitNo ]]; then
+			return 0
+		fi
+		
+		if (( systemEventSelection > 0 && systemEventSelection < quitNo )); then
+			setTrigger $1 "${systemEvents[$(($systemEventSelection - 1))]}"
+		fi
+		
+	done
+}
+
+getTriggers() {
+	cat $LEDPATH/$1/trigger
+}
+
+setTrigger() {
+	echo $2 > $LEDPATH/$1/trigger
 }
 
 main
