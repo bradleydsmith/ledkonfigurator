@@ -66,10 +66,12 @@ ledManipulationMenu() {
 }
 
 ledTurnOff() {
+	setTrigger $1 "none"
 	echo 0 > $LEDPATH/$1/brightness
 }
 
 ledTurnOn() {
+	setTrigger $1 "none"
 	echo 1 > $LEDPATH/$1/brightness
 }
 
