@@ -55,7 +55,10 @@ ledManipulationMenu() {
 			3)
 				systemEventMenu "$led"
 				;;
-			4|5)
+			4)
+				associateProcessMenu
+				;;
+			5)
 				echo 'Unimplemented'
 				;;
 			6)
@@ -121,4 +124,36 @@ setTrigger() {
 	echo "$2" > "$LEDPATH/$1/trigger"
 }
 
+associateProcessMenu() {
+	local processName
+	local monitorOption
+	local conflictChoice
+	local matches=()
+	
+	echo 'Associate LED with the performance of a process'
+	echo '------------------------------------------------'
+	read -r -p "Please enter the name of the program to monitor(partial names are ok): " processName
+	read -r -p "Do you wish to 1) monitor memory or 2) monitor cpu? [enter memory or cpu]: " monitorOption
+	
+	matches=($(ps aux | grep "${processName}" | grep -v grep | awk '{ n=split ($11,a,/\//); print a[n] }' | sort -u ))
+	
+	if ((${#matches[@]} > 1)); then
+		echo 'Name Conflict'
+		echo '-------------'
+		echo 'I have detected a name conflict. Do you want to monitor:'
+		local conflictCounter=1
+		for match in ${matches[@]}; do
+			echo "${conflictCounter}) ${match}";
+			((conflictCounter++));
+		done
+		echo "${conflictCounter}) Cancel Request";
+		
+		read -r -p "Please select an option (1-${conflictCounter}): " conflictChoice
+		
+		if [[ $conflictChoice = "$conflictCounter" ]]; then
+			return 0
+		fi
+	fi
+	
+}
 main
