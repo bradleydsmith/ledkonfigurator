@@ -19,13 +19,13 @@ main() {
 		echo "${quitNo}. Quit"
 		
 		local selection
-		read -p "Please enter a number (1-${quitNo}) for the led to configure or quit: " selection
-		if [[  $selection = $quitNo ]]; then
+		read -r -p "Please enter a number (1-${quitNo}) for the led to configure or quit: " selection
+		if [[  $selection = "$quitNo" ]]; then
 			echo "Quit"
 			exit 0
 		fi
 		
-		ledManipulationMenu ${ledFiles[$((selection-1))]}
+		ledManipulationMenu "${ledFiles[$((selection-1))]}"
 	done
 }
 
@@ -43,17 +43,17 @@ ledManipulationMenu() {
 		echo '4. Associate with the performance of a process'
 		echo '5. Stop association with a process performance'
 		echo '6. Quit to main menu'
-		read -p 'Please enter a number (1-6) for your choice: ' selection
+		read -r -p 'Please enter a number (1-6) for your choice: ' selection
 	
 		case "$selection" in
 			1)
-				ledTurnOn $led
+				ledTurnOn "$led"
 				;;
 			2)
-				ledTurnOff $led
+				ledTurnOff "$led"
 				;;
 			3)
-				systemEventMenu $led
+				systemEventMenu "$led"
 				;;
 			4|5)
 				echo 'Unimplemented'
@@ -66,31 +66,31 @@ ledManipulationMenu() {
 }
 
 ledTurnOff() {
-	setTrigger $1 "none"
-	echo 0 > $LEDPATH/$1/brightness
+	setTrigger "$1" "none"
+	echo 0 > $LEDPATH/"$1"/brightness
 }
 
 ledTurnOn() {
-	setTrigger $1 "none"
-	echo 1 > $LEDPATH/$1/brightness
+	setTrigger "$1" "none"
+	echo 1 > $LEDPATH/"$1"/brightness
 }
 
 systemEventMenu() {
 	local systemEventSelection
 	while true; do
-		local pageMenu=()
+		local pageMenu=""
 		pageMenu="${pageMenu}"'Associate Led with a system Event\n'
 		pageMenu="${pageMenu}"'=================================\n'
 		pageMenu="${pageMenu}"'Available events are:\n'
 		pageMenu="${pageMenu}"'---------------------\n'
 		local systemEvents=()
-		read -r -a systemEvents <<< $(getTriggers $1)
+		read -r -a systemEvents <<< "$(getTriggers "$1")"
 		local counter=0
 		for event in "${systemEvents[@]}"; do
 			(( counter = counter + 1 ))
 			pageMenu="${pageMenu} ${counter}) "
 			if [[ $event =~ ^\[.+\]$ ]]; then
-				event=$(echo ${event} | sed -r -e 's/\[(.*)\]/\1/')
+				event=$(echo "${event}" | sed -r -e 's/\[(.*)\]/\1/')
 				pageMenu="${pageMenu}${event}*"'\n'
 				systemEvents[$((counter - 1))]=${event}
 			else
@@ -100,25 +100,25 @@ systemEventMenu() {
 		echo -e "${pageMenu}" | more
 		quitNo=$((counter+1))
 		local systemEventSelection
-		read -p "Please select an option: (1-${quitNo}): " systemEventSelection
+		read -r -p "Please select an option: (1-${quitNo}): " systemEventSelection
 		
-		if [[ $systemEventSelection = $quitNo ]]; then
+		if [[ $systemEventSelection = "$quitNo" ]]; then
 			return 0
 		fi
 		
 		if (( systemEventSelection > 0 && systemEventSelection < quitNo )); then
-			setTrigger $1 "${systemEvents[$(($systemEventSelection - 1))]}"
+			setTrigger "$1" "${systemEvents[$((systemEventSelection - 1))]}"
 		fi
 		
 	done
 }
 
 getTriggers() {
-	cat $LEDPATH/$1/trigger
+	cat "$LEDPATH/$1/trigger"
 }
 
 setTrigger() {
-	echo $2 > $LEDPATH/$1/trigger
+	echo "$2" > "$LEDPATH/$1/trigger"
 }
 
 main
