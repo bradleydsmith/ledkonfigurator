@@ -1,5 +1,7 @@
 #!/bin/bash
 
+LEDPATH=/sys/class/leds
+
 main() {
 	local OPTIND
 	local opt
@@ -48,6 +50,37 @@ main() {
 		echo $usage
 		return 1
 	fi
+	
+	if [[ $monitor = "cpu" ]]; then
+		monitorCPU $processName $led
+	fi
+}
+
+setTrigger() {
+	echo "$2" > "$LEDPATH/$1/trigger"
+}
+
+ledTurnOff() {
+	setTrigger "$1" "none"
+	echo 0 > $LEDPATH/"$1"/brightness
+}
+
+ledTurnOn() {
+	setTrigger "$1" "none"
+	echo 1 > $LEDPATH/"$1"/brightness
+}
+
+monitorCPU() {
+	setTrigger $2 "none"
+	while true; do
+		local processCPUUsage=($(ps aux | grep "${1}" | grep -v grep | awk '{ n=split ($3,a,/\//); print a[n] }' ))
+		processCPUUsage=$(echo ${processCPUUsage[@]} | sed "s/ /+/g")
+		local totalCPUUsage=$(echo "scale=2;" ${processCPUUsage} | bc)
+		localSleepTime=$(echo "scale=2; (${totalCPUUsage}/100)" | bc)
+		ledTurnOn $2
+		sleep $localSleepTime
+		ledTurnOff $2
+	done
 }
 
 main $@
