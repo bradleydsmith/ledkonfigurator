@@ -59,7 +59,7 @@ ledManipulationMenu() {
 				associateProcessMenu "$led"
 				;;
 			5)
-				echo 'Unimplemented'
+				unassociateProcess
 				;;
 			6)
 				return 0
@@ -159,4 +159,10 @@ associateProcessMenu() {
 	(./process_monitor_led_konfigurator.sh -l "${1}" -m "${monitorOption}" -p "${processName}" 2>&1 &)
 	
 }
+
+unassociateProcess() {
+	local processID=$(ps aux | grep 'process_monitor_led_konfigurator.sh' | grep -v grep | awk '{ print $2 }')
+	kill $processID
+}
+
 main
