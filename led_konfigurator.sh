@@ -56,7 +56,7 @@ ledManipulationMenu() {
 				systemEventMenu "$led"
 				;;
 			4)
-				associateProcessMenu
+				associateProcessMenu "$led"
 				;;
 			5)
 				echo 'Unimplemented'
@@ -135,8 +135,8 @@ associateProcessMenu() {
 	read -r -p "Please enter the name of the program to monitor(partial names are ok): " processName
 	read -r -p "Do you wish to 1) monitor memory or 2) monitor cpu? [enter memory or cpu]: " monitorOption
 	
-	matches=($(ps aux | grep "${processName}" | grep -v grep | awk '{ n=split ($11,a,/\//); print a[n] }' | sort -u ))
-	
+	matches=($(ps aux | grep "${processName}" | awk '{ n=split ($11,a,/\//); print a[n] }' | sort -u ))
+	processName=${matches[0]}
 	if ((${#matches[@]} > 1)); then
 		echo 'Name Conflict'
 		echo '-------------'
@@ -153,7 +153,10 @@ associateProcessMenu() {
 		if [[ $conflictChoice = "$conflictCounter" ]]; then
 			return 0
 		fi
+		processName=${matches[((conflictChoice-1))]}
 	fi
+	
+	(./process_monitor_led_konfigurator.sh -l "${1}" -m "${monitorOption}" -p "${processName}" 2>&1 &)
 	
 }
 main
