@@ -135,7 +135,7 @@ associateProcessMenu() {
 	read -r -p "Please enter the name of the program to monitor(partial names are ok): " processName
 	read -r -p "Do you wish to 1) monitor memory or 2) monitor cpu? [enter memory or cpu]: " monitorOption
 	
-	matches=($(ps aux | grep "${processName}" | awk '{ n=split ($11,a,/\//); print a[n] }' | sort -u ))
+	matches=($(ps aux | grep "${processName}" | grep -v grep | awk '{ n=split ($11,a,/\//); print a[n] }' | sort -u ))
 	processName=${matches[0]}
 	if ((${#matches[@]} > 1)); then
 		echo 'Name Conflict'
