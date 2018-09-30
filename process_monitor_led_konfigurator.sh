@@ -45,7 +45,7 @@ main() {
 		return 1
 	fi
 	
-	if [[ $monitor != "cpu" && monitor != "memory" ]]; then
+	if [[ $monitor != "cpu" && $monitor != "memory" ]]; then
 		echo 'error: monitor value must be cpu or memory'
 		echo $usage
 		return 1
@@ -53,6 +53,10 @@ main() {
 	
 	if [[ $monitor = "cpu" ]]; then
 		monitorCPU $processName $led
+	fi
+	
+	if [[ $monitor = "memory" ]]; then
+		monitorMemory $processName $led
 	fi
 }
 
@@ -77,6 +81,21 @@ monitorCPU() {
 		processCPUUsage=$(echo ${processCPUUsage[@]} | sed "s/ /+/g")
 		local totalCPUUsage=$(echo "scale=2;" ${processCPUUsage} | bc)
 		localSleepTime=$(echo "scale=2; (${totalCPUUsage}/100)" | bc)
+		ledTurnOn $2
+		sleep $localSleepTime
+		ledTurnOff $2
+	done
+}
+
+monitorMemory() {
+	setTrigger $2 "none"
+	while true; do
+		local processMemoryUsage=($(ps aux | grep "${1}" | grep -v grep | awk '{ n=split ($4,a,/\//); print a[n] }' ))
+		processMemoryUsage=$(echo ${processMemoryUsage[@]} | sed "s/ /+/g")
+		echo $processMemoryUsage
+		local totalMemoryUsage=$(echo "scale=2;" ${processMemoryUsage} | bc)
+		localSleepTime=$(echo "scale=2; (${totalMemoryUsage}/100)" | bc)
+		echo $totalMemoryUsage $localSleepTime
 		ledTurnOn $2
 		sleep $localSleepTime
 		ledTurnOff $2
