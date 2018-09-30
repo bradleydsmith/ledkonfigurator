@@ -92,10 +92,8 @@ monitorMemory() {
 	while true; do
 		local processMemoryUsage=($(ps aux | grep "${1}" | grep -v grep | awk '{ n=split ($4,a,/\//); print a[n] }' ))
 		processMemoryUsage=$(echo ${processMemoryUsage[@]} | sed "s/ /+/g")
-		echo $processMemoryUsage
 		local totalMemoryUsage=$(echo "scale=2;" ${processMemoryUsage} | bc)
 		localSleepTime=$(echo "scale=2; (${totalMemoryUsage}/100)" | bc)
-		echo $totalMemoryUsage $localSleepTime
 		ledTurnOn $2
 		sleep $localSleepTime
 		ledTurnOff $2
