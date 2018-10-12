@@ -100,8 +100,9 @@ systemEventMenu() {
 				pageMenu="${pageMenu}${event}"'\n'
 			fi
 		done
-		echo -e "${pageMenu}" | more
 		quitNo=$((counter+1))
+		pageMenu="${pageMenu} ${quitNo}) Quit to previous menu"
+		echo -e "${pageMenu}" | more
 		local systemEventSelection
 		read -r -p "Please select an option: (1-${quitNo}): " systemEventSelection
 		
