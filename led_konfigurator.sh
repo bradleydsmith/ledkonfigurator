@@ -91,7 +91,7 @@ systemEventMenu() {
 		local counter=0
 		for event in "${systemEvents[@]}"; do
 			(( counter = counter + 1 ))
-			pageMenu="${pageMenu} ${counter}) "
+			pageMenu="${pageMenu}${counter}) "
 			if [[ $event =~ ^\[.+\]$ ]]; then
 				event=$(echo "${event}" | sed -r -e 's/\[(.*)\]/\1/')
 				pageMenu="${pageMenu}${event}*"'\n'
@@ -101,7 +101,7 @@ systemEventMenu() {
 			fi
 		done
 		quitNo=$((counter+1))
-		pageMenu="${pageMenu} ${quitNo}) Quit to previous menu"
+		pageMenu="${pageMenu}${quitNo}) Quit to previous menu"
 		echo -e "${pageMenu}" | more
 		local systemEventSelection
 		read -r -p "Please select an option: (1-${quitNo}): " systemEventSelection
