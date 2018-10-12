@@ -142,7 +142,7 @@ associateProcessMenu() {
 		echo '-------------'
 		echo 'I have detected a name conflict. Do you want to monitor:'
 		local conflictCounter=1
-		for match in ${matches[@]}; do
+		for match in "${matches[@]}"; do
 			echo "${conflictCounter}) ${match}";
 			((conflictCounter++));
 		done
@@ -161,8 +161,11 @@ associateProcessMenu() {
 }
 
 unassociateProcess() {
-	local processID=$(ps aux | grep 'process_monitor_led_konfigurator.sh' | grep -v grep | awk '{ print $2 }')
-	kill $processID
+	local processID
+	local psOutput
+	psOutput=$(ps aux)
+	processID=$(echo "${psOutput}" | grep 'process_monitor_led_konfigurator.sh' | grep -v grep | awk '{ print $2 }')
+	kill "$processID"
 }
 
 main
