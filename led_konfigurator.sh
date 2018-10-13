@@ -32,7 +32,9 @@ main() {
 			exit 0
 		fi
 		
-		ledManipulationMenu "${ledFiles[$((selection-1))]}"
+		if ((selection > 0 && selection < quitNo)); then
+			ledManipulationMenu "${ledFiles[$((selection-1))]}"
+		fi
 	done
 }
 
@@ -151,6 +153,7 @@ systemEventMenu() {
 		
 		if (( systemEventSelection > 0 && systemEventSelection < quitNo )); then
 			setTrigger "$1" "${systemEvents[$((systemEventSelection - 1))]}"
+			return 0
 		fi
 		
 	done
@@ -178,13 +181,39 @@ associateProcessMenu() {
 	echo 'Associate LED with the performance of a process'
 	echo '------------------------------------------------'
 	read -r -p "Please enter the name of the program to monitor(partial names are ok): " processName
-	read -r -p "Do you wish to 1) monitor memory or 2) monitor cpu? [enter memory or cpu]: " monitorOption
+	
+	# Cancel if no process name entered
+	if [[ $processName = "" ]]; then
+		echo 'Cancelled'
+		return 0
+	fi
+	
+	while true; do
+		read -r -p "Do you wish to 1) monitor memory or 2) monitor cpu? [enter memory or cpu]: " monitorOption
+		if [[ $monitorOption = "memory" ]]; then
+			break
+		fi
+		if [[ $monitorOption = "cpu" ]]; then
+			break
+		fi
+		# Cancel if no option entered
+		if [[ $monitorOption = "" ]]; then
+			echo 'Cancelled'
+			return 0
+		fi
+	done
 	
 	# Read the list of processes, get only the process base name,
 	# search for the user's entered process name and show
 	# it only once if there is more than one of the process.
 	# All stored in an array.
 	matches=($(ps aux | awk '{ n=split ($11,a,/\//); print a[n] }' | grep "${processName}" | sort -u ))
+	
+	if ((${#matches[@]} == 0)); then
+		echo 'No matches for the entered process name'
+		return 0
+	fi
+	
 	processName=${matches[0]}
 	# If there is more than one match display the conflict menu
 	if ((${#matches[@]} > 1)); then
