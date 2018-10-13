@@ -1,0 +1,26 @@
+Introduction
+------------
+
+The LEDKonfigurator script allows for the manipulation
+in various ways of LEDs on a Linux system including
+
+- Turning LEDs on/off
+- Changing the system event trigger for LEDs
+- Monitoring the performance of a process and turning
+  LEDs on/off according to that performance
+
+Usage
+-----
+
+The script is run by executing the
+led_konfigurator.sh script. It must be run as a user
+with the appropriate privliges or with sudo to have
+the approriate privliges.
+
+The script is menu driven and is used by entering
+input as prompted by the script.
+
+Maintainers
+------------
+
+* Bradley Smith
